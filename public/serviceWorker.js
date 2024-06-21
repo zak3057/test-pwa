@@ -14,23 +14,22 @@ self.addEventListener('install', (event) => {
 // Listen for requests
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then(() => {
-      return fetch(event.request).catch(() => caches.match('offline.html'));
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request).catch(() => caches.match('offline.html'));
     })
   );
 });
 
 // Activate the SW
 self.addEventListener('activate', (event) => {
-  const casheWhitelist = [];
-  casheWhitelist.push(CACHE_NAME);
+  const cacheWhitelist = [CACHE_NAME];
 
   event.waitUntil(
-    caches.keys().then((casheNames) =>
+    caches.keys().then((cacheNames) =>
       Promise.all(
-        casheNames.map((casheName) => {
-          if (!casheWhitelist.includes(casheName)) {
-            return cashes.delete(casheName);
+        cacheNames.map((cacheName) => {
+          if (!cacheWhitelist.includes(cacheName)) {
+            return caches.delete(cacheName);
           }
         })
       )
