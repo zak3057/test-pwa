@@ -1,22 +1,50 @@
-import { useState } from 'react'
 import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0)
+const askNotificationPermission = () => {
+  return new Promise((resolve) => {
+    if (Notification.permission === 'granted') {
+      resolve('granted');
+    } else if (Notification.permission === 'denied') {
+      resolve('denied');
+    } else {
+      Notification.requestPermission().then(permission => {
+        resolve(permission);
+      });
+    }
+  });
+}
 
+const sendNotification = async () => {
+  await new Promise<void>((resolve) => {
+    setTimeout(() => {
+      resolve()
+    }, 10000);
+  })
+
+  if (Notification.permission === 'granted') {
+    navigator.serviceWorker.getRegistration().then(registration => {
+      if (registration) {
+        registration.showNotification('Hello World!', {
+          body: 'This is a test notification',
+        });
+      }
+    });
+  }
+}
+
+function App() {
   return (
     <>
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+        <button onClick={() => askNotificationPermission()}>
+          通知許可
         </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <div className="card">
+        <button onClick={() => sendNotification()}>
+          local push
+        </button>
+      </div>
     </>
   )
 }
